@@ -1,0 +1,74 @@
+# ContactTools — Git 忽略规则
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+.env
+.env.*
+
+# --- DBeaver 本地配置（含绝对路径，每人不同）---
+DBeaver/.dbeaver/data-sources.json
+DBeaver/.dbeaver/*.bak
+
+# --- IDE / 编辑器 ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# --- 数据库与审阅报告 ---
+data/*.sqlite
+data/*.sqlite-*
+data/*.db
+data/review_warnings.txt
+data/import_preview.txt
+data/add_contact_preview.txt
+data/test_*
+
+# --- VCF ---
+*.vcf
+!templates/*.vcf
+
+# --- 表格类中间文件 ---
+*.csv
+*.xlsx
+*.xls
+*.ods
+*.odb
+
+# --- 本地目录 ---
+input/*
+!input/.gitkeep
+App/*
+plugin/*
+*.deb
+**/sqlite-jdbc*.jar
+
+# --- legacy 样本与日志 ---
+legacy/log/
+legacy/vcf_sample/
+legacy/Contacts.csv
+legacy/output.csv
+legacy/*.xlsx
+legacy/*.csv
+legacy/*.vcf
+legacy/*.odb
+
+# --- 测试 / 覆盖率 ---
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# --- 操作系统 ---
+.DS_Store
+Thumbs.db
+desktop.ini

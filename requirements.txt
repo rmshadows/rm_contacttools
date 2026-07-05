@@ -1,0 +1,6 @@
+# ContactTools 依赖（SQLite 使用标准库，无需额外安装数据库驱动）
+
+pypinyin>=0.51.0
+
+# 可选：旧版 legacy 脚本仍使用
+vobject==0.9.9
