@@ -40,13 +40,13 @@ SELECT
     c.url,
     CASE WHEN c.photo IS NOT NULL THEN 1 ELSE 0 END AS has_photo,
     (
-        SELECT GROUP_CONCAT(
-            p.number || ' (' || p.types || ')',
-            '; '
+        SELECT GROUP_CONCAT(item, '; ')
+        FROM (
+            SELECT p.number || ' (' || p.types || ')' AS item
+            FROM phones p
+            WHERE p.contact_id = c.id
             ORDER BY p.sort_order, p.id
         )
-        FROM phones p
-        WHERE p.contact_id = c.id
     ) AS phones,
     (
         SELECT COUNT(*)
@@ -54,13 +54,13 @@ SELECT
         WHERE p.contact_id = c.id
     ) AS phone_count,
     (
-        SELECT GROUP_CONCAT(
-            e.address || ' (' || e.types || ')',
-            '; '
+        SELECT GROUP_CONCAT(item, '; ')
+        FROM (
+            SELECT e.address || ' (' || e.types || ')' AS item
+            FROM emails e
+            WHERE e.contact_id = c.id
             ORDER BY e.sort_order, e.id
         )
-        FROM emails e
-        WHERE e.contact_id = c.id
     ) AS emails
 FROM contacts c;
 
