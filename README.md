@@ -21,7 +21,8 @@ python 4-export_vcf.py            # → contacts_YYYYMMDD_HHMMSS.vcf
 
 | 文档 | 内容 |
 |------|------|
-| [使用说明.md](使用说明.md) | 步骤 0～7、导入模式、DBeaver 参考、SQL 整理语句 |
+| [使用说明.md](使用说明.md) | 步骤 0～7、导入模式、**SQL 整理语句**（已测试） |
+| [DBeaver/Scripts/README.md](DBeaver/Scripts/README.md) | 同上 SQL 的 DBeaver 脚本版（查询 / 写入） |
 | 下文 [FAQ](#faq) | 导入模式边界情形、环境兼容 |
 | [docs/contacttools.md](docs/contacttools.md) | `contacttools` 包结构 |
 | [docs/dbeaver-setup.md](docs/dbeaver-setup.md) | DBeaver 连接 SQLite |
@@ -39,6 +40,7 @@ ContactTools/
 ├── templates/                        VCF 格式样本（format_sample.vcf）
 ├── input/                            待导入文件（.gitignore）
 ├── data/                             SQLite 与运行时报告（.gitignore）
+├── DBeaver/Scripts/                  DBeaver SQL 脚本（查询 / 写入）
 ├── App/                              本地安装包，如 DBeaver .deb（.gitignore）
 ├── plugin/                           JDBC 驱动 jar（.gitignore）
 └── legacy/                           旧版脚本
@@ -100,18 +102,37 @@ input/contacts.vcf
 | `v_duplicate_phones` / `v_duplicate_phone_detail` | 重复号码 |
 
 **勿改** `contacts.id`。删整人删 `contacts` 行即可，`phones`/`emails` 级联删除。  
-更多 SQL 见 [使用说明.md — SQL 整理语句](使用说明.md#sql-整理语句)。
+完整整理语句见 [使用说明.md — SQL 整理语句](使用说明.md#sql-整理语句)；同内容亦整理为 [DBeaver/Scripts/](DBeaver/Scripts/README.md) 脚本（`写入-` 带 ⚠️ 标注）。
 
 ```sql
--- 浏览
+-- 查 ─────────────────────────────────────────
 SELECT * FROM v_contacts_full ORDER BY fn_pinyin COLLATE NOCASE;
-SELECT * FROM v_duplicate_phone_detail ORDER BY dup_count DESC;
+SELECT * FROM v_contacts_wide WHERE id = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
+SELECT * FROM v_duplicate_phone_detail ORDER BY dup_count DESC, fn_pinyin, number;
+SELECT * FROM v_duplicate_phones ORDER BY contact_count DESC;
+SELECT c.fn, p.number, p.types FROM contacts c
+  JOIN phones p ON p.contact_id = c.id WHERE p.number = '13800138000';
 
--- 增删改
+-- 增 ─────────────────────────────────────────
 INSERT INTO phones (contact_id, number, types, pref, sort_order)
   VALUES ('联系人id', '13900139000', 'CELL', 0, 2);
-UPDATE contacts SET fn = '全名', n_given = '全名', n_family = '' WHERE id = '联系人id';
-DELETE FROM contacts WHERE id = '联系人id';
+INSERT INTO emails (contact_id, address, types, sort_order)
+  VALUES ('联系人id', 'a@example.com', 'WORK', 0);
+
+-- 改 ─────────────────────────────────────────
+UPDATE contacts SET fn = '全名', n_given = '全名', n_family = ''
+  WHERE id = '联系人id';
+UPDATE contacts SET org = '单位', note = '备注' WHERE id = '联系人id';
+UPDATE phones SET number = '13800138000', types = 'HOME;FAX' WHERE id = 123;
+
+-- 删 ─────────────────────────────────────────
+DELETE FROM contacts WHERE id = '联系人id';          -- 删整人（推荐）
+DELETE FROM phones WHERE id = 123;                   -- 只删一个号码
+
+-- 工具 ───────────────────────────────────────
+.tables                          -- sqlite3 终端：列出表
+.schema contacts                 -- 看表结构
+SELECT COUNT(*) FROM contacts;   -- 条数
 ```
 
 命令行：`sqlite3 data/contacts.sqlite`
