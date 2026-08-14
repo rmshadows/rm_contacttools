@@ -6,7 +6,9 @@ from typing import Literal
 from contacttools.models.contact import Contact
 from contacttools.ops.diff import (
     copy_contact,
+    describe_content_diffs,
     diff_contact_fields,
+    find_contacts_sharing_phone,
     find_identical_contact,
     summarize_delete,
     summarize_new,
@@ -142,13 +144,28 @@ def build_import_plan(
             if identical:
                 plan.skip_lines.append(
                     f"  = 跳过  {contact.fn}  "
-                    f"(与库中 {identical.fn} id {identical.id[:8]}… 内容完全一致)"
+                    f"(与库中 {identical.fn} id {identical.id[:8]}… 内容一致，忽略头像差异)"
                 )
                 plan.skip_count += 1
             else:
-                plan.insert_lines.append(
-                    summarize_new(contact, note="与库中无完全一致记录，作为新条写入")
-                )
+                related = find_contacts_sharing_phone(db, contact)
+                if related:
+                    existing = related[0]
+                    diffs = describe_content_diffs(contact, existing)
+                    detail = "; ".join(diffs) if diffs else "内容有差异"
+                    plan.insert_lines.append(
+                        summarize_new(
+                            contact,
+                            note=(
+                                f"与库中「{existing.fn}」同号但不完全一致"
+                                f"（{detail}），将另增一条"
+                            ),
+                        )
+                    )
+                else:
+                    plan.insert_lines.append(
+                        summarize_new(contact, note="库中无同号记录，作为新条写入")
+                    )
                 plan.insert_count += 1
         return plan
 

@@ -9,7 +9,7 @@ class TelTypeParseTest(unittest.TestCase):
         text = """BEGIN:VCARD
 VERSION:4.0
 FN:test
-TEL;TYPE="HOME;FAX":01012345678
+TEL;TYPE="HOME;FAX":05966531114
 END:VCARD"""
         phones = parse_vcf_text(text)[0].phones
         self.assertEqual(phones[0].types, ["HOME", "FAX"])
@@ -18,7 +18,7 @@ END:VCARD"""
         text = """BEGIN:VCARD
 VERSION:4.0
 FN:test
-TEL;TYPE=WORK;TYPE=FAX:01087654321
+TEL;TYPE=WORK;TYPE=FAX:05966536889
 END:VCARD"""
         phones = parse_vcf_text(text)[0].phones
         self.assertEqual(phones[0].types, ["WORK", "FAX"])
@@ -36,9 +36,9 @@ END:VCARD"""
     def test_roundtrip_multi_type(self):
         original = """BEGIN:VCARD
 VERSION:4.0
-FN:示例机构
-TEL;TYPE=HOME:01011112222
-TEL;TYPE="WORK;FAX":01087654321
+FN:中共漳州市龙海区委宣传部
+TEL;TYPE=HOME:05966522719
+TEL;TYPE="WORK;FAX":05966536889
 END:VCARD"""
         contact = parse_vcf_text(original)[0]
         exported = contacts_to_vcf_text([contact])

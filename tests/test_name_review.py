@@ -15,12 +15,12 @@ from contacttools.vcf.parser import parse_vcf_text
 
 ROOT = Path(__file__).resolve().parents[1]
 
-_VCARD_SAMPLE = "\n".join(
+_VCARD_FUBIN = "\n".join(
     [
         "BEGIN:VCARD",
-        "FN:小明 张",
-        "N:张;小明;;;",
-        "TEL;TYPE=CELL:13800000008",
+        "FN:福彬 张",
+        "N:张;福彬;;;",
+        "TEL;TYPE=CELL:18659682808",
         "END:VCARD",
     ]
 )
@@ -28,18 +28,18 @@ _VCARD_SAMPLE = "\n".join(
 
 class NameNormalizeTest(unittest.TestCase):
     def test_fullname_mode(self):
-        c = Contact(fn="小明 张", n_family="张", n_given="小明")
+        c = Contact(fn="福彬 张", n_family="张", n_given="福彬")
         normalize_to_fullname(c)
-        self.assertEqual(c.fn, "小明 张")
+        self.assertEqual(c.fn, "福彬 张")
         self.assertEqual(c.n_family, "")
-        self.assertEqual(c.n_given, "小明 张")
+        self.assertEqual(c.n_given, "福彬 张")
 
     def test_split_mode(self):
-        c = Contact(fn="小明 张", n_family="张", n_given="小明")
+        c = Contact(fn="福彬 张", n_family="张", n_given="福彬")
         normalize_split_name(c)
-        self.assertEqual(c.fn, "小明 张")
+        self.assertEqual(c.fn, "福彬 张")
         self.assertEqual(c.n_family, "张")
-        self.assertEqual(c.n_given, "小明")
+        self.assertEqual(c.n_given, "福彬")
         self.assertEqual(format_warnings(c, name_mode="split"), [])
 
     def test_format_ok_after_fullname_normalize(self):
@@ -59,18 +59,18 @@ class NameNormalizeTest(unittest.TestCase):
         self.assertTrue(format_warnings(c, name_mode="fullname"))
 
     def test_vcf_import_split(self):
-        contacts = parse_vcf_text(_VCARD_SAMPLE)
+        contacts = parse_vcf_text(_VCARD_FUBIN)
         normalize_name(contacts[0], "split")
-        self.assertEqual(contacts[0].fn, "小明 张")
+        self.assertEqual(contacts[0].fn, "福彬 张")
         self.assertEqual(contacts[0].n_family, "张")
-        self.assertEqual(contacts[0].n_given, "小明")
+        self.assertEqual(contacts[0].n_given, "福彬")
 
     def test_vcf_import_fullname(self):
-        contacts = parse_vcf_text(_VCARD_SAMPLE)
+        contacts = parse_vcf_text(_VCARD_FUBIN)
         normalize_name(contacts[0], "fullname")
-        self.assertEqual(contacts[0].fn, "小明 张")
+        self.assertEqual(contacts[0].fn, "福彬 张")
         self.assertEqual(contacts[0].n_family, "")
-        self.assertEqual(contacts[0].n_given, "小明 张")
+        self.assertEqual(contacts[0].n_given, "福彬 张")
 
     def test_ambiguous_same_name(self):
         a = Contact(fn="王伟", id="a", phones=[Phone(number="13800000001")])

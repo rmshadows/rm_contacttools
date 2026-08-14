@@ -96,6 +96,47 @@ class AppendImportTest(unittest.TestCase):
         b = Contact(fn="王五", note="新", phones=[Phone(number="13700000001")])
         self.assertFalse(contacts_semantically_equal(a, b))
 
+    def test_semantic_equal_ignores_photo_by_default(self):
+        a = Contact(
+            fn="赵六",
+            phones=[Phone(number="13600000001")],
+            photo=b"aaa",
+        )
+        b = Contact(
+            fn="赵六",
+            phones=[Phone(number="13600000001")],
+            photo=b"bbb",
+        )
+        self.assertTrue(contacts_semantically_equal(a, b))
+        self.assertFalse(contacts_semantically_equal(a, b, ignore_photo=False))
+
+    def test_append_skips_when_only_photo_differs(self):
+        db_path = ROOT / "data" / "test_append_photo.sqlite"
+        db_path.unlink(missing_ok=True)
+        with Database(db_path) as db:
+            db.init_schema()
+            db.save_contact(
+                Contact(
+                    fn="钱七",
+                    phones=[Phone(number="13500000001")],
+                    photo=b"old-photo",
+                )
+            )
+            plan = build_import_plan(
+                db,
+                [
+                    Contact(
+                        fn="钱七",
+                        phones=[Phone(number="13500000001")],
+                        photo=b"new-photo-bytes",
+                    )
+                ],
+                "append",
+            )
+            self.assertEqual(plan.skip_count, 1)
+            self.assertEqual(plan.insert_count, 0)
+        db_path.unlink(missing_ok=True)
+
 
 if __name__ == "__main__":
     unittest.main()
